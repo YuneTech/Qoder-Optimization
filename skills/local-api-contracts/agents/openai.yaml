@@ -1,0 +1,4 @@
+interface:
+  display_name: "本地 API 契约"
+  short_description: "兼容现有接口契约，核对分页、幂等、错误处理与真实消费方测试"
+  default_prompt: "使用 $local-api-contracts 处理当前任务中对应的专项问题，并按本地约定验证结果。"

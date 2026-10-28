@@ -1,0 +1,4 @@
+interface:
+  display_name: "本地浏览器端到端验证"
+  short_description: "沿受影响用户路径验证浏览器交互、请求、截图及失败证据"
+  default_prompt: "使用 $local-browser-e2e 处理当前任务中对应的专项问题，并按本地约定验证结果。"

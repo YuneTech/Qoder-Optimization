@@ -1,0 +1,22 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Backups and scratch files
+*.bak
+*.bak_*
+*.bak-*
+*~
+*.log
+
+# Node dependencies (this repository ships no node_modules)
+node_modules/
+npm-debug.log*
+
+# Local secrets — never commit these
+.env
+.env.*
+*.pem
+*.key
+credentials.*

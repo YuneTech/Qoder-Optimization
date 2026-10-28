@@ -1,0 +1,25 @@
+{
+  "maintainer": "local user configuration",
+  "sources": [
+    {
+      "repository": "affaan-m/ECC",
+      "commit": "2d515e4fc2ddef97354769812cf3f7b9ec4e5124",
+      "path": "skills/rust-patterns/SKILL.md",
+      "url": "https://github.com/affaan-m/ECC/blob/2d515e4fc2ddef97354769812cf3f7b9ec4e5124/skills/rust-patterns/SKILL.md",
+      "source_sha256": "51379df2bd92a482309e109e5a210210842594f660cceeb2d68d18e995108edf"
+    },
+    {
+      "repository": "affaan-m/ECC",
+      "commit": "2d515e4fc2ddef97354769812cf3f7b9ec4e5124",
+      "path": "skills/rust-testing/SKILL.md",
+      "url": "https://github.com/affaan-m/ECC/blob/2d515e4fc2ddef97354769812cf3f7b9ec4e5124/skills/rust-testing/SKILL.md",
+      "source_sha256": "02a9a40dcc42dd21d14730d29b13ee0a8b274694360585dc0fadb2602eb56ddf"
+    }
+  ],
+  "adaptation": "Chinese task-scoped rewrite; preserve local precedence, target toolchain, existing tools and authorization; no upstream hooks/MCP/global config copied",
+  "files": {
+    "LICENSE-ECC.txt": "326146379f01bb137c0a5d3c54770c1aa31076705c8b88a7f6b26a460f6221b2",
+    "SKILL.md": "3abd1c9487eb2ac3c0cce1395256bd1a314b1b1162342b5aa6fb1f09e1df6521",
+    "agents\\openai.yaml": "920a9918edef93ea4d61c78a81223ea870372162cc9beafefe3dacb132be6a56"
+  }
+}

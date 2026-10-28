@@ -1,0 +1,25 @@
+{
+  "maintainer": "local user configuration",
+  "sources": [
+    {
+      "repository": "affaan-m/ECC",
+      "commit": "2d515e4fc2ddef97354769812cf3f7b9ec4e5124",
+      "path": "skills/springboot-patterns/SKILL.md",
+      "url": "https://github.com/affaan-m/ECC/blob/2d515e4fc2ddef97354769812cf3f7b9ec4e5124/skills/springboot-patterns/SKILL.md",
+      "source_sha256": "ff1884a8492d078d1bbb35f3ce0a8ae25f1ad95dab8596f4944a7c3110680946"
+    },
+    {
+      "repository": "affaan-m/ECC",
+      "commit": "2d515e4fc2ddef97354769812cf3f7b9ec4e5124",
+      "path": "skills/mybatis-patterns/SKILL.md",
+      "url": "https://github.com/affaan-m/ECC/blob/2d515e4fc2ddef97354769812cf3f7b9ec4e5124/skills/mybatis-patterns/SKILL.md",
+      "source_sha256": "9b1d2d79222a57ab7bdbebeeb53a92aa87849f329a96c7df5b9ada651796f9f0"
+    }
+  ],
+  "adaptation": "Chinese task-scoped rewrite; preserve local precedence, target toolchain, existing tools and authorization; no upstream hooks/MCP/global config copied",
+  "files": {
+    "LICENSE-ECC.txt": "326146379f01bb137c0a5d3c54770c1aa31076705c8b88a7f6b26a460f6221b2",
+    "SKILL.md": "78612da51dd20fd82c85a8dee2258a1d808e0bf0b7685680ca1f2ef664021332",
+    "agents\\openai.yaml": "bf993e257d0866bf4d45322435127fc85bd48ed0bf63d06e5d3417d1cad89fb2"
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "本地 Rust 工程质量"
+  short_description: "依项目工具链检查 Rust 所有权、异步并发与真实测试边界"
+  default_prompt: "使用 $local-rust-engineering 处理当前任务中对应的专项问题，并按本地约定验证结果。"

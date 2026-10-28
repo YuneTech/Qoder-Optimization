@@ -1,0 +1,4 @@
+interface:
+  display_name: "本地数据库迁移"
+  short_description: "核对数据库迁移的锁、兼容、回填、恢复与真实验证边界"
+  default_prompt: "使用 $local-db-migrations 处理当前任务中对应的专项问题，并按本地约定验证结果。"

@@ -1,0 +1,622 @@
+{
+ "package_name": "Qoder-Optimization",
+ "version": "0.0.1",
+ "generated": "2026-10-27T15:17:26Z",
+ "skills": [
+  {
+   "name": "architecture-designer",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "async-python-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "audit-ci-cost-levers",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "awesome-design-md",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "byok-model-retry",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "cloudbase-wechat-integration",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "concurrent-edit-attribution-check",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "continuation-state-audit",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "deliver-prd",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "desktop-update-push-triage",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "diagnose-github-actions-quota",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "diagnose-windows-webview2-blank-window",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "disk-junction-migration",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "distinctive-design-systems",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "dsh-session-format-debug",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "electron-app-stuck-spinner-triage",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "electron-asar-code-forensics",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "electron-tray-icon-diagnosis",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "encrypted-office-visual-inspection",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "frontend-design-ui-ux",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "frontend-development",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "game-designer-toolkit",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "game-numeric-design",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "github-accelerator",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "global-config-smoke-runner",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "goal-driven-execution",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "hid-device-protocol-probe",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "i-have-adhd",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "java-architect",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "java-quality",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "kafka-best-practices",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "large-sqlite-text-extraction",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "local-api-contracts",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "local-browser-e2e",
+   "tier": "library",
+   "files": 4
+  },
+  {
+   "name": "local-db-migrations",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "local-frontend-a11y",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "local-performance-evidence",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "local-rust-engineering",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "local-spring-mybatis",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "mechanize-rule-into-hook-guard",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "memory-entry-update",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "merge-inbound-qoder-package",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "minigame-dev-pro",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "miniprogram-development",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mongodb-atlas-stream-processing",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mongodb-connection",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mongodb-mcp-setup",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mongodb-natural-language-querying",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mongodb-query-optimizer",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mongodb-schema-design",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mongodb-search-and-ai",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "mysql",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "nextjs-app-router-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "nginx-config-builder",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "nodejs-backend-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "office-docs",
+   "tier": "core",
+   "files": 5
+  },
+  {
+   "name": "open-code-review-delegate",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "oracledb",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "pause-writer-before-shared-file-edit",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "postgresql-optimization",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "postgresql-table-design",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "powershell-windows-display-interop",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "python-anti-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "python-backend-guidelines",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "python-dataviz",
+   "tier": "library",
+   "files": 4
+  },
+  {
+   "name": "python-error-handling",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "python-performance-optimization",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "python-programmer",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "python-project-structure",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "python-testing-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "python-type-safety",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "rabbitmq-expert",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "react-modernization",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "redis-clustering",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "redis-connections",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "redis-core",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "redis-observability",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "redis-search",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "redis-security",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "redis-semantic-cache",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "rules-conflict-audit",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "safe-text-editing",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "self-evolution",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "senior-devops",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "setup-windows-selfhosted-runner",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "ship-clean-pr",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "shipped-app-js-patch-hygiene",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "skill-authoring-closure",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "skill-description-route-cue-rewrite",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "skill-reference-integrity-audit",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "skill-tiering-lazy-load",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "skill-trim-with-capability-transfer",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "skills-router",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "spring-aop",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "spring-boot-actuator",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "spring-boot-cache",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "spring-boot-event-driven-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "spring-boot-resilience4j",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "spring-boot-rest-api-standards",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "spring-boot-test-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "spring-events",
+   "tier": "library",
+   "files": 3
+  },
+  {
+   "name": "springboot-patterns",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "springboot-verification",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "structured-edit-safety",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "systemd-java-service-centos7",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "tailwindcss-animations",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "typescript-pro",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "umi3-to-umi4-upgrade",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "user-side-deploy-verify",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "verify-before-claim",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "verify-ui-in-browser",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "verify-windows-cmd-tool",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "vibe-coding-workflow",
+   "tier": "core",
+   "files": 3
+  },
+  {
+   "name": "vibecoding-doc",
+   "tier": "core",
+   "files": 1
+  },
+  {
+   "name": "vue-expert",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "wechat-miniprogram-dev",
+   "tier": "library",
+   "files": 2
+  },
+  {
+   "name": "windows-desktop-keyboard-automation",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "windows-elevated-changes-from-git-bash",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "windows-gitbash-command-safety",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "windows-powershell-from-gitbash",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "windows-relocated-install-path-repair",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "windows-ui-forensics-powershell",
+   "tier": "library",
+   "files": 1
+  },
+  {
+   "name": "write-repowiki",
+   "tier": "core",
+   "files": 1
+  }
+ ]
+}

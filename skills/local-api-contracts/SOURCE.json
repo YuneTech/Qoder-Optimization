@@ -1,0 +1,18 @@
+{
+  "maintainer": "local user configuration",
+  "sources": [
+    {
+      "repository": "affaan-m/ECC",
+      "commit": "2d515e4fc2ddef97354769812cf3f7b9ec4e5124",
+      "path": "skills/api-design/SKILL.md",
+      "url": "https://github.com/affaan-m/ECC/blob/2d515e4fc2ddef97354769812cf3f7b9ec4e5124/skills/api-design/SKILL.md",
+      "source_sha256": "250e464413a13c0eb93cc73447b423df1f9aa8e4f80e5e68c41f895b2c33e352"
+    }
+  ],
+  "adaptation": "Chinese task-scoped rewrite; preserve local precedence, target toolchain, existing tools and authorization; no upstream hooks/MCP/global config copied",
+  "files": {
+    "LICENSE-ECC.txt": "326146379f01bb137c0a5d3c54770c1aa31076705c8b88a7f6b26a460f6221b2",
+    "SKILL.md": "7b6607d2be06b6c2e373f819d3d55528a7e6c5912dcf367427f21d71ea746e4b",
+    "agents\\openai.yaml": "1dcbad4bb2e5ecfb54d7786563c6d3af475c4e1915237e1058f3f3e0604ca17b"
+  }
+}

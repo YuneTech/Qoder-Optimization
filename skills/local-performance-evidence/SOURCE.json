@@ -1,0 +1,18 @@
+{
+  "maintainer": "local user configuration",
+  "sources": [
+    {
+      "repository": "EveryInc/compound-engineering-plugin",
+      "commit": "51aa537383744736eb8ad30468d34420e9fb8ea8",
+      "path": "skills/ce-optimize/SKILL.md",
+      "url": "https://github.com/EveryInc/compound-engineering-plugin/blob/51aa537383744736eb8ad30468d34420e9fb8ea8/skills/ce-optimize/SKILL.md",
+      "source_sha256": "fb40ad0520ee9d04844b1f9efe46c799a6b40504188fb16ae6bbf57148e30c2d"
+    }
+  ],
+  "adaptation": "Chinese task-scoped rewrite; preserve local precedence, target toolchain, existing tools and authorization; no upstream hooks/MCP/global config copied",
+  "files": {
+    "LICENSE-CE.txt": "957b98d327e7b3c55cead4d726022d3617d6aeff5ea824f715c6f9cca15493b4",
+    "SKILL.md": "d88e3c7bcc13c382b5c7e877accf8f95877d915903dbf069c4b14aca51d19ee1",
+    "agents\\openai.yaml": "5e6de8ce9e9a77ea4f2f51d7c33e8c32535f8324e01ba985da73c4cfb13284b6"
+  }
+}

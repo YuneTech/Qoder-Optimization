@@ -1,0 +1,62 @@
+{
+  "_说明": "MCP 配置示例（占位符版，不含任何凭据）。把需要的段落合并进你自己的 ~/.qoder/settings.json 的 mcpServers；Windows 上推荐\"全局安装 + node 直调\"。",
+  "mcpServers": {
+    "context7": {
+      "command": "<Node 安装目录>/node.exe",
+      "args": [
+        "<全局 node_modules>/@upstash/context7-mcp/dist/index.js"
+      ],
+      "_说明": "技术文档检索（公共 MCP，npx -y @upstash/context7-mcp 亦可）"
+    },
+    "dbhub": {
+      "command": "<Node 安装目录>/node.exe",
+      "args": [
+        "<全局 node_modules>/@bytebase/dbhub/dist/index.js",
+        "--transport",
+        "stdio",
+        "--config=<你的 dbhub.toml 路径>"
+      ],
+      "_说明": "多库只读查询（@bytebase/dbhub）。连接串写在独立 toml 里，只读 + 行数上限；凭据不入仓库/记忆。"
+    },
+    "cua-computer-use": {
+      "type": "stdio",
+      "command": "<Cua Driver 安装目录>\\cua-driver.exe",
+      "args": [
+        "mcp"
+      ],
+      "_说明": "桌面自动化增强驱动（与 Qoder 内置 `computer-use` 并存）。装完二进制后把这段并入 mcpServers；两侧客户端（~/.qoder 与 ~/.qoder-cn）要各自注册一次，写完需重开会话才出现在工具列表。stdio 入口负责连接 / 拉起 driver daemon；重开会话后先做 tools/list 冒烟（`cua-driver serve`），Windows 上把 serve 放启动文件夹 VBS 自启（计划任务要管理员权限）。"
+    }
+  },
+  "_本地自建不随包": {
+    "workflow-ops": {
+      "_说明": "本机自建 MCP（工作流设计器操作），启动命令指向本地源码，源码不随包；有该仓库时按 \"node <仓库>/src/index.js\" 注册，没有就删掉不要加。"
+    }
+  },
+  "_hooks_example": {
+    "_说明": "配套的鼠标抢占守卫接线（cua-cursor-guard.js）。客户端对 matcher 按**正则匹配工具名**；Pre 拦高危参数并快照真实光标，Post 发现光标被搬走就还原并复验。挂进 settings.json 的 hooks 里：",
+    "PreToolUse": [
+      {
+        "matcher": "mcp_call|mcp__cua[_-]?(?:driver|computer[_-]?use)__.*|^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<Node 安装目录>/node.exe <你的配置目录>/scripts/cua-cursor-guard.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp_call|mcp__cua[_-]?(?:driver|computer[_-]?use)__.*|^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "<Node 安装目录>/node.exe <你的配置目录>/scripts/cua-cursor-guard.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

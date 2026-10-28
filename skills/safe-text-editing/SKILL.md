@@ -1,0 +1,49 @@
+---
+name: safe-text-editing
+description: 改文件与传参的字符安全 playbook。当"内容写出来不对"时用：引号/反斜杠/反引号/`$` 被 shell 先解释、中文进 .cmd 变乱码、CRLF 与 GBK 被改写、整文件覆盖丢内容、替换串手抄失配、管道吞掉退出码、命令成功但改错地方。触发词：编辑出错、字符被吃掉、内容不对、乱码、转义、引号问题、sed 替换没生效、写进去的不是我要的、编码、GBK、CRLF、退出码不对。不用于：纯文本内容校对（走文档类技能）、.cmd 工具的整套改/验/发链（走 verify-windows-cmd-tool）。
+---
+
+# 改文本 / 传参：字符安全 playbook
+
+这类故障的共同点是**不报错只出错**：命令成功、脚本无语法错，但文件里的字符被改写、替换没命中、或改的不是你以为的那一处。下面按"现象 → 根因 → 正确写法"给配方。
+
+## 一、判断"是谁吃掉了字符"
+
+| 现象 | 根因 | 正确写法 |
+|---|---|---|
+| 内联脚本里的 `\`xxx\`` 被当命令执行 / 文本变形 | **双引号里 bash 先做命令替换与变量展开**（`huge-output-guard` 会拦这种写法，是保护不是误报） | 文本落成文件：编辑工具，或带引号 heredoc `<<'EOF'`（引号让 bash 不做替换）；脚本落成 `.cjs` 再 `node <file>` |
+| 替换后文件**体积暴涨**、同一节出现多次 | **字符串替换的 `$` 模式**：`$` 紧跟反引号或单引号、以及 `$&` / `$1` 这类序列，在替换串里有特殊含义（匹配点之前/之后的内容、分组）——JS `String.replace` 与 Python `re.sub` 的字符串替换都会中招；实测把 47k 字符的文档一次放大到 128k | 用**函数式替换**：JS 写成 `s.replace(锚点, () => 文本)`、Python 写成 `re.sub(锚点, lambda m: 文本, s)`；替换后断言「目标节只出现 1 次 + 体积增幅有界」 |
+| Node 里 `/tmp/x` 打不开（Windows 侧报成盘根下的 tmp） | MSYS/Git Bash 的 `/tmp` 与 Node 的路径口径不同（Node 不认 MSYS 挂载） | 脚本里用 `os.tmpdir()` 或 `%TEMP%` 的全路径；别把 bash 的 `/tmp/...` 直接喂给 Node |
+| `sed` / 替换脚本"跑成功了但没改到" | 匹配串是**手抄**的，转义层数（`\\` vs `\`）、全角/半角引号、尾随空格、CRLF 与文件不一致 | 匹配串**从文件里程序化提取**（读那一行 → 用它构造 replacement），别手抄；改完 `grep -c` 断言新片段在、旧片段不在 |
+| 进程收到的 Windows 路径没反斜杠（`C:Usersx`），不报错但指向错地方 / VBS 摆出错误对话框 | **多层转义**：bash 双引号吃一层 → JS 字符串吃一层 → 目标语言（JS/VBS/PS）再吃一层。`node -e "…'C:\\\\Users\\\\x'…"` 是重灾区 | 脚本用 **Write 落盘**成 `.cjs` 再 `node <文件>`；路径一律**正斜杠** `C:/Example/x` 或 `path.join(process.env.APPDATA, …)`；已由 `win-path-guard` 门禁硬拦（2026-10-26），被拦就换写法而不是加转义层 |
+| 脚本语法通不过 / 数组少一个元素 | 拼接替换文本时把分隔符（`,`, `],`）吃掉了——典型是"整条替换"只换了前半段 | 替换后立刻 `node --check`；构造长字符串时**在末尾显式带分隔符**，并用"替换条数 = N"的计数断言 |
+| 中文写进 `.cmd` 变乱码 / 执行报路径错 | 文件被写成 UTF-8（`.cmd` 需要 **GBK + CRLF**） | 走 GBK+CRLF 链：UTF-8 工作副本 → 转 CRLF → 转 GBK → 装到目标 → **md5 逐字节比对**（完整链见技能 `verify-windows-cmd-tool`） |
+| `git commit -m "中文…"` 报 E175008 或存成乱码 | 内联参数过不了编码层 | `git commit -F <消息文件>`；提交后向 HEAD 复验实际写入的消息 |
+| `VITE_BASE=/` 变成安装目录路径 | Git Bash（MSYS）把裸露 `/x` 当路径改写 | `MSYS_NO_PATHCONV=1` 前缀，或把值写进配置文件/`.env` 由程序读 |
+| 命令明明失败，脚本却继续 | `cmd \| tail` 的退出码是 `tail` 的 | `cmd > /tmp/x.log 2>&1; echo $?`，或用 `${PIPESTATUS[0]}` |
+| 多行脚本改了些东西又报错，文件处于半改状态 | 没落盘就执行、没有存档点 | 先备份（`edit-guard` 会在无版本库兜底时提醒）；改大文件分批并每批回读 |
+
+## 二、编辑动作本身的三条规矩
+
+1. **局部替换优先于整文件覆盖**：Edit 类的定点替换天然带"匹配失败即报错"的保护；Write 整覆盖没有任何保护，写错就是把文件擦了（必须备份 + 回读）。
+2. **替换文本先看字节，再看语义**：涉及反斜杠、引号、制表符、中文标点时，先 `sed -n 'Np' file | xxd | head -5` 看清真实字节，再构造替换串。
+3. **同一文件的多处修改一次构造、一次写盘、一次校验**——分多次小改容易在中途留下半成品，且每次都要重读（并行会话还可能在你两次读之间改了它）。
+
+## 三、回读校验（做完必跑，判据要能失败）
+
+```bash
+node ~/.qoder/skills/safe-text-editing/scripts/text-check.js <文件> \
+  --has '新片段' --not '旧片段' --eol crlf --encoding gbk        # 按需给断言
+node ~/.qoder/skills/safe-text-editing/scripts/text-check.js --selftest
+```
+
+- 语法类：`.js` → `node --check`；`.sh` → `bash -n`；`.json` / XML → 解析一次。
+- 内容类：**"新片段在"** 与 **"旧片段不在"** 两条都要断言（只查前者会被残留内容蒙混）。
+- 编码类：`--encoding gbk|utf8`、`--eol crlf|lf`、`--bom`（工具给退出码，不给"看起来对"）。
+
+## 四、边界
+
+- **本类问题已有门禁**：`win-path-guard.js`（PreToolUse，matcher `^Bash$`）拦三种形态——`node -e/--eval/-p` 负载里的盘符+反斜杠路径、`node -e` 里拼 VBS 三引号、经 heredoc/echo 往 `.js/.cjs/.mjs/.vbs/.ps1` 写单反斜杠盘符路径。被拦不是误报，按提示改写法；确实要放行时写 `~/.qoder/win-path-guard.json` 的 `{"mode":"warn"}` 或 `{"disabled":true}`（自测：`node ~/.qoder/scripts/win-path-guard.test.js`）。
+- 别为了"让检查通过"绕过守卫（`huge-output-guard` / `edit-guard`）：它们的判据都是踩过的坑，被拦就改写法。
+- 本技能只管**文本与传参**；`.cmd` 工具的整套"改 / 验 / 发"（真机点选、截图、SendInput）走 `verify-windows-cmd-tool`。
+- 涉及中文的**跨机打包/提交**，先确认目标端期望的编码，再决定转换方向（详情与坑见记忆里的 PowerShell / .bat 编码条目）。

@@ -1,0 +1,275 @@
+#!/usr/bin/env node
+// 体检脚本的可失败性验证：在隔离的假 HOME 里造违规 → 断言报红 → 还原 → 断言零告警。
+// 用假 HOME 而不是改真实配置：不冒污染真源的风险，且能造出真实配置里不该有的状态。
+//   node ~/.qoder/scripts/rules-weekly-audit.test.js   → 全绿退 0，任一失败退 1
+'use strict';
+const fs = require('fs');
+const path = require('path');
+const { spawnSync } = require('child_process');
+
+const NODE = process.execPath;
+const AUDIT = path.join(__dirname, 'rules-weekly-audit.js');
+const SB = path.join(require('os').tmpdir(), 'q31', 'audit-sandbox');
+const H = path.join(SB, '.qoder');
+const C = path.join(SB, '.qoder-cn');
+
+function w(p, t) { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, t); }
+
+const AGENTS = [
+  '# 全局开发规则', '',
+  '> 首要纪律：不要随意停止；只有六种情形可以停下（见冲突裁决优先级）。', '',
+  '## 冲突裁决优先级', '推送 / 部署前必须完整检验（本地小增量提交按影响面配比）。', '',
+  '## 工作方式', '预算判断只在开工前：装不下时按「切小单元」继续。', '',
+  '引入 `rules/java.md` 与 `scripts/helper.js`，另见技能 `i-have-adhd`。', '',
+  '允许结束回合的只有三种情形。（两把尺子：可停下问 ≠ 可结束回合。）', '',
+].join('\n');
+const RULE = (name, trig) => `---\ntrigger: ${trig}\nglob: ["**/*.java"]\ndescription: 测试规则 ${name}，用于体检脚本的沙箱验证。\n---\n\n# ${name}\n\n- 内容。\n`;
+// 基线里这条 hook 必须指向**真实存在**的脚本：V18（hook 指向不存在的脚本）落地后，
+// 指向一个不存在的路径会让"健康沙箱零告警"直接判红。桩文件在 buildSandbox 里落盘。
+const GUARD = path.join(H, 'scripts', 'global-config-guard.js');
+const SETTINGS = JSON.stringify({ hooks: { UserPromptSubmit: [{ hooks: [{ type: 'command', command: 'x', timeout: 5 }] }], Stop: [{ hooks: [{ type: 'command', command: 'x', timeout: 5 }] }], SessionStart: [{ hooks: [{ type: 'command', command: 'x', timeout: 5 }, { type: 'command', command: 'node ' + GUARD, timeout: 15 }] }], PreToolUse: [{ hooks: [{ type: 'command', command: 'x', timeout: 5 }] }] } }, null, 2);
+
+function buildSandbox({ slowMemory = false, staleHeartbeat = false } = {}) {
+  fs.rmSync(SB, { recursive: true, force: true });
+  for (const side of [H, C]) {
+    w(path.join(side, 'AGENTS.md'), AGENTS);
+    w(path.join(side, 'rules', 'java.md'), RULE('java', 'glob'));
+    w(path.join(side, 'settings.json'), SETTINGS);
+    w(path.join(side, 'tmp', 'stop-gate', 'violations.log'), 'x\n');
+  }
+  // 假同步脚本：只满足审计的调用契约（快，便于做干净的基线对照）
+  const memStub = slowMemory
+    ? '#!/bin/bash\nsleep 12\n echo "[memory-sync] 两侧一致"\nexit 0\n'
+    : '#!/bin/bash\necho "[memory-sync] 两侧一致（2 个文件，含 MEMORY.md），索引自洽。"\nexit 0\n';
+  w(path.join(H, 'scripts', 'sync-memory.sh'), memStub);
+  w(path.join(C, 'scripts', 'sync-memory.sh'), memStub);
+  fs.copyFileSync(path.join(__dirname, 'sync-global-config.sh'), path.join(H, 'scripts', 'sync-global-config.sh'));
+  w(path.join(H, 'scripts', 'helper.js'), '// stub\n');
+  // 遵守率检查要求"每条纪律挂的机制存在、且判据还在"，所以桩里必须带上被探针匹配的字符串，
+  // 否则基线就会因为"机制缺失"报红，后面所有"植入后必须报红"的断言都失去意义。
+  w(path.join(H, 'scripts', 'rules-reminder.js'), '// stub: 简体中文 / 不随意停止\n');
+  w(path.join(H, 'scripts', 'stop-gate.js'), '// stub: R1b- R2- R3- R5- R9-claim-without-run\n');
+  w(path.join(H, 'scripts', 'attempt-lock-core.js'), '// stub: 同类操作连败计数（构建/测试/部署）\n');
+  w(path.join(H, 'scripts', 'global-config-guard.js'), '// stub: 悬空引用（基线 hook 指向它，必须真实存在）\n');
+  w(path.join(H, 'scripts', 'session-budget.js'), '// stub: compactionNote\n');
+  w(path.join(H, 'scripts', 'edit-guard.js'), '// stub: 备份提醒\n');
+  w(path.join(H, 'scripts', 'export-memory.sh'), '#!/bin/bash\n# stub: scan_gate\n');
+  // 周检会跑 `disk-sweeper.js --json` 报水位 ⇒ 基线必须镜像真契约，否则"零告警"根本立不住
+  w(path.join(H, 'scripts', 'disk-sweeper.js'),
+    'process.stdout.write(JSON.stringify({ freeGb: 200, level: "ok", tier1Files: 0, tier1Bytes: 0,'
+    + ' extraFiles: 0, extraBytes: 0, archiveSuggested: null }))\n');
+  w(path.join(H, 'scripts', 'rules-reminder.log'), '2026-09-19T00:00:00Z ok\n');
+  if (staleHeartbeat) {
+    const old = Date.now() / 1000 - 20 * 86400;
+    fs.utimesSync(path.join(H, 'scripts', 'rules-reminder.log'), old, old);
+    fs.utimesSync(path.join(H, 'tmp', 'stop-gate', 'violations.log'), old, old);
+  }
+}
+
+function audit(extraArgs = []) {
+  const r = spawnSync(NODE, [AUDIT, ...extraArgs], { encoding: 'utf8', env: { ...process.env, HOME: SB, USERPROFILE: SB, HOOK_CRASH_LOG: path.join(SB, 'sandbox-hooks-crash.log') }, timeout: 120000 });
+  return { code: r.status, out: (r.stdout || '') + (r.stderr || '') };
+}
+
+let fail = 0;
+const check = (label, ok, detail) => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? ' :: ' + detail : ''}`); if (!ok) fail++; };
+
+// ── 基线对照：健康沙箱必须零告警（否则后面的"报红"没有意义）──
+buildSandbox();
+let r = audit();
+check('基线：健康沙箱零告警', r.code === 0, `exit=${r.code}`);
+
+// ── 逐项植入违规 ──
+const cases = [
+  {
+    name: 'V1 悬空引用（引用了不存在的 rules/scripts）',
+    plant: () => { const p = path.join(H, 'rules', 'java.md'); fs.writeFileSync(p, fs.readFileSync(p, 'utf8') + '\n见 `rules/ghost.md` 与 `scripts/ghost.js`。\n'); w(path.join(C, 'rules', 'java.md'), fs.readFileSync(p, 'utf8')); },
+    expect: /适用性[\s\S]{0,200}ghost\.md/,
+  },
+  {
+    name: 'V2 frontmatter 非法（trigger 缺失/非法）',
+    plant: () => { const p = path.join(H, 'rules', 'java.md'); const t = '---\ndescription: 没有 trigger 的规则示例。\n---\n\n# java\n'; fs.writeFileSync(p, t); w(path.join(C, 'rules', 'java.md'), t); },
+    expect: /frontmatter/,
+  },
+  {
+    name: 'V3 冲突回归 C1（写回"提交前必须完整检验"旧措辞）',
+    plant: () => { const p = path.join(H, 'rules', 'java.md'); const t = fs.readFileSync(p, 'utf8').replace('推送 / 部署前必须完整检验', '') + '\n提交前必须完整检验，测试全绿才允许提交。\n'; fs.writeFileSync(p, t); w(path.join(C, 'rules', 'java.md'), t); },
+    expect: /冲突回归[\s\S]{0,120}C1/,
+  },
+  {
+    name: 'V4 领域规则放宽通用纪律（"不必验证"）',
+    plant: () => { const p = path.join(H, 'rules', 'java.md'); const t = fs.readFileSync(p, 'utf8') + '\n小改动不必验证，直接上。\n'; fs.writeFileSync(p, t); w(path.join(C, 'rules', 'java.md'), t); },
+    expect: /放宽通用纪律/,
+  },
+  {
+    name: 'V18 hook 指向不存在的路径 → 报"该机制从未运行过"（2026-10-06 实测事故）',
+    // 真实事故的形状：接线在、事件对、两侧一致，唯独脚本路径是另一台机器的用户目录。
+    // 前面几道（漏挂 / 两侧不一致 / 心跳）全都看不见，而 hook 失败是 fail-open ⇒ 台账零行。
+    plant: () => {
+      for (const side of [H, C]) {
+        const p = path.join(side, 'settings.json');
+        const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+        c.hooks.Stop = [{ hooks: [{ type: 'command', command: 'node ~/.qoder/scripts/nope-stop-gate.js', timeout: 15 }] }];
+        fs.writeFileSync(p, JSON.stringify(c, null, 2));
+      }
+    },
+    expect: /指向不存在的脚本[\s\S]{0,160}从未运行过/,
+  },
+  {
+    name: 'V20 另一侧 scripts/ 与 skills/ 整个不存在 → 报"两侧不对等"（2026-10-06 实测：CN 重装后链接丢失，此前无任何检查出声）',
+    plant: () => {
+      for (const d of ['scripts', 'skills']) fs.rmSync(path.join(C, d), { recursive: true, force: true });
+    },
+    expect: /机制脚本目录「scripts」两侧不对等[\s\S]{0,80}仅非 CN 有/,
+  },
+  {
+    name: 'V20b 两侧同缺 skills（合法形态，不是漂移）⇒ 不判红（对照组）',
+    plant: () => {
+      for (const side of [H, C]) fs.rmSync(path.join(side, 'skills'), { recursive: true, force: true });
+    },
+    want: 'any',
+    expect: /^((?!技能库「skills」两侧不对等)[\s\S])*$/,
+  },
+  {
+    name: 'V21 cua-driver 有新版未升 → 报 warn（自动更新纪律的机制面，2026-10-14）',
+    plant: () => {
+      w(path.join(SB, '.cua-driver', 'version_check.json'), JSON.stringify({ latest_version: '0.35.2', last_checked_at: '2026-10-14T00:00:00Z' }));
+      fs.mkdirSync(path.join(SB, '.cua-driver', 'packages', 'releases', '0.30.2-windows-x86_64'), { recursive: true });
+    },
+    expect: /cua-driver 有新版未升：0\.30\.2 → 0\.35\.2/,
+  },
+  {
+    name: 'V21b 已升到最新 ⇒ 不报（对照组）',
+    plant: () => {
+      w(path.join(SB, '.cua-driver', 'version_check.json'), JSON.stringify({ latest_version: '0.35.2' }));
+      fs.mkdirSync(path.join(SB, '.cua-driver', 'packages', 'releases', '0.35.2-x86_64-pc-windows-msvc'), { recursive: true });
+    },
+    want: 0,
+    expect: /^((?!cua-driver 有新版未升)[\s\S])*$/,
+  },
+  {
+    name: 'V5 hook 接线缺失（Stop 被摘掉）',
+    plant: () => { const p = path.join(H, 'settings.json'); const c = JSON.parse(fs.readFileSync(p, 'utf8')); delete c.hooks.Stop; fs.writeFileSync(p, JSON.stringify(c, null, 2)); w(path.join(C, 'settings.json'), fs.readFileSync(p, 'utf8')); },
+    expect: /缺 Stop 接线/,
+  },
+  {
+    name: 'V6 机制心跳过期（20 天没动静）',
+    build: () => buildSandbox({ staleHeartbeat: true }),
+    expect: /天没更新/,
+  },
+  {
+    name: 'V7 两侧漂移（改单边，--no-fix 下应报 DRIFT）',
+    plant: () => { fs.appendFileSync(path.join(H, 'rules', 'java.md'), '\n只改了本侧。\n'); },
+    expect: /漂移|DRIFT/,
+    args: ['--no-fix'],
+  },
+  {
+    name: 'V8 AGENTS.md 篇幅超硬线',
+    plant: () => { const bloated = AGENTS + '\n' + Array(200).fill('- 填充行').join('\n') + '\n'; w(path.join(H, 'AGENTS.md'), bloated); w(path.join(C, 'AGENTS.md'), bloated); },
+    expect: /已 \d+ 行（硬线 190）/,
+  },
+  {
+    name: 'V11 遵守率：机制文件被删 → 报"机制掉了"',
+    plant: () => { fs.rmSync(path.join(H, 'scripts', 'stop-gate.js')); },
+    expect: /遵守率[\s\S]{0,200}机制缺失 stop-gate\.js/,
+  },
+  {
+    name: 'V12 遵守率：机制里判据被改名 → 报"找不到对应判据"',
+    plant: () => { w(path.join(H, 'scripts', 'stop-gate.js'), '// stub: R1b- R2x R3- R5-\n'); },
+    expect: /遵守率[\s\S]{0,240}已找不到对应判据/,
+  },
+  {
+    name: 'V13 两侧 hook 接线不一致（只在 CN 多挂一个）→ 报"接线不一致"',
+    plant: () => {
+      const p = path.join(C, 'settings.json');
+      const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+      c.hooks.Stop.push({ hooks: [{ type: 'command', command: 'only-on-cn.js', timeout: 5 }] });
+      fs.writeFileSync(p, JSON.stringify(c, null, 2));
+    },
+    expect: /两侧接线不一致[\s\S]{0,120}仅 CN 有/,
+  },
+  {
+    name: 'V14 两侧都漏挂同一事件 → 完整性检查仍要报',
+    plant: () => {
+      for (const side of [H, C]) {
+        const p = path.join(side, 'settings.json');
+        const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+        delete c.hooks.PreToolUse;
+        fs.writeFileSync(p, JSON.stringify(c, null, 2));
+      }
+    },
+    expect: /缺 PreToolUse 接线/,
+  },
+  {
+    name: 'V15 磁盘工具跑不起来 → 周检必须出声（否则低水位提醒会静默消失）',
+    plant: () => { w(path.join(H, 'scripts', 'disk-sweeper.js'), 'throw new Error("模块坏了")\n'); },
+    expect: /磁盘水位[\s\S]{0,200}未能执行|磁盘水位[\s\S]{0,200}不是 JSON/,
+  },
+  {
+    name: 'V17 settings 里有 modelConfigs.customModels → 周检必须报红（它会把 BYOK provider 整体清掉）',
+    plant: () => {
+      const p = path.join(C, 'settings.json');
+      const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+      c.modelConfigs = { customModels: [{ provider: 'qoder-custom-x', apiKey: 'k', model: 'm' }] };
+      fs.writeFileSync(p, JSON.stringify(c, null, 2));
+    },
+    expect: /modelConfigs\.customModels[\s\S]{0,160}provider 会被整体丢弃/,
+  },
+  {
+    name: 'V9 内联检查耗时超预算（调用方必然超时）',
+    build: () => buildSandbox({ slowMemory: true }),
+    expect: /超出调用方预算 8s/,
+  },
+  {
+    name: 'V9b 内联检查串行合计越过 hook 超时（被掐死的是整段体检）',
+    plant: () => {
+      // 把消费者自己的超时压到 8s，而它内部两路检查各带 8s 上限、总预算 11s ⇒ 必然越界。
+      // 单项判据看不见这种洞：每一路都"没超时"，加起来却整段被 hook 掐掉、连提醒都不输出。
+      for (const side of [H, C]) {
+        const p = path.join(side, 'settings.json');
+        const c = JSON.parse(fs.readFileSync(p, 'utf8'));
+        for (const g of (c.hooks || {}).SessionStart || []) {
+          for (const h of g.hooks || []) {
+            if (String(h.command).includes('global-config-guard.js')) h.timeout = 8;
+          }
+        }
+        fs.writeFileSync(p, JSON.stringify(c, null, 2));
+      }
+    },
+    expect: /声明的总预算 11s ≥ hook 超时 8s/,
+  },
+];
+
+for (const c of cases) {
+  if (c.build) c.build(); else { buildSandbox(); c.plant(); }
+  const res = audit(c.args || []);
+  // 植入型用例默认要求"报红且退 1"；对照组用 `want: 0` 要求"健康退 0"、`want: 'any'` 只断言输出内容
+  // （有些对照场景会合法地带着别的告警退 1，此时只有"某句话不得出现"才是有效断言）。
+  const wantCode = c.want === 'any' ? null : (c.want ?? 1);
+  const pass = (wantCode === null || res.code === wantCode) && c.expect.test(res.out);
+  check(c.name, pass, `exit=${res.code}`);
+  if (!pass) {
+    console.log('     实际输出片段：' + res.out.replace(/\n/g, ' | ').slice(0, 240));
+  }
+}
+
+// ── 自动修：漂移在默认模式下应被修掉且退出码回落 ──
+buildSandbox();
+fs.appendFileSync(path.join(H, 'rules', 'java.md'), '\n只改了本侧。\n');
+r = audit();
+check('V10 漂移默认只报告而不自动覆盖', r.code === 1 && /两侧漂移/.test(r.out) && !/已自动同步/.test(r.out), `exit=${r.code}`);
+const after = fs.readFileSync(path.join(C, 'rules', 'java.md'), 'utf8');
+check('V10b 未授权时另一侧原文保持不变', !after.includes('只改了本侧'));
+
+// ── 单端形态（只装 Qoder，没有 ~/.qoder-cn）：合法安装，必须同样零告警 ──
+// 这是 2026-09-23 修掉的一类假警报：两个同步脚本曾硬要求"另一侧"存在（退 2），
+// 于是单端用户每次开会话都会收到"规则不生效"，周检也会滚出一堆"读不到/解析失败"。
+buildSandbox();
+fs.rmSync(C, { recursive: true, force: true });
+r = audit();
+check('V16 单端（无 ~/.qoder-cn）也必须零告警（反假警报）', r.code === 0, `exit=${r.code}`);
+if (r.code !== 0) console.log('     实际输出片段：' + r.out.replace(/\n/g, ' | ').slice(0, 300));
+
+fs.rmSync(SB, { recursive: true, force: true });
+console.log(fail === 0 ? '\nALL PASS' : `\n${fail} FAILURE(S)`);
+process.exit(fail === 0 ? 0 : 1);
